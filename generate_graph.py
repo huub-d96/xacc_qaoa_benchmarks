@@ -1,7 +1,12 @@
+'''
+Functions to generate graphs for maxcut, traveling salesman and dominating set 
+problem.
+Original code: https://github.com/koenmesman/benchmark_qaoa_IBM
+Edited by: huub-d96
+'''
+
 import time
 import random
-import numpy as np
-
 
 # returns a graph with a set edge to vertices ratio
 def set_density(n, r):

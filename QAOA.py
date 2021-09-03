@@ -2,9 +2,17 @@
 Created on Thu Aug  5 12:05:10 2021
 
 Auhtor: Huub Donkers
-Project: QAOA for maxcut, travellings salesman and dominating set problem
-Description: QAOA functions
-
+Project: QAOA Benchmarks XACC platform
+Description: QAOA for maxcut, travellings salesman and dominating set problem.
+             TSP and DSP functions based on work from:
+                 https://github.com/koenmesman/benchmark_qaoa_IBM
+             This program contains functions to:
+                 - Generate MCP, TSP and DSP xacc circuits
+                 - Compute cost for MCP, TSP and DSP qubit measurements
+                 - Run QAOA using the scipy optimize function ('COBYLA')
+                 - Get local and remote runtimes for each QAOA job
+                 - Plot measured qubit results (if verbose)
+                 - Print optimizer results (if verbose)
 """
 
 import xacc
@@ -20,6 +28,16 @@ from qiskit import IBMQ
 provider = IBMQ.load_account()
 
 def genTSPCircuit(qpu, qpu_id, graph, params):
+    """"
+    Parameters:
+        qpu : XACC Accelerator Object - Used for circuit compiler
+        qpu_id : string - Used to do some additional mapping for IBM backend
+        graph : list - Contains information about graph size and edge
+        params : list - Parameters beta and gamma used by optimizer
+
+    Returns:
+        mapped_program : XACC Composite Intstruction
+    """   
     
     compiler = xacc.getCompiler('xasm')
     circuit = '__qpu__ void qaoa_tsp(qbit q){  \n'
@@ -66,12 +84,20 @@ def genTSPCircuit(qpu, qpu_id, graph, params):
     program = compiler.compile(circuit, qpu)
     
     mapped_program = program.getComposite('qaoa_tsp')
-    #if(qpu_id[0:3] == 'ibm'):
-       # mapped_program.defaultPlacement(qpu)
+    if(qpu_id[0:3] == 'ibm'):
+        mapped_program.defaultPlacement(qpu)
         
     return mapped_program
 
 def getTSPExpectation(counts, graph):
+    """
+    Parameters:
+        counts : dict - Number of measurements per qubit bitstring
+        graph : list - Contains information about graph size and edge
+
+    Returns:
+        total_cost : float - Cost result for certain counts and graph
+    """
     
     v, A, D = graph
     
@@ -104,6 +130,16 @@ def getTSPExpectation(counts, graph):
 
 
 def genDSPCircuit(qpu, qpu_id, graph, params):
+    """
+    Parameters:
+        qpu : XACC Accelerator Object - Used for circuit compiler
+        qpu_id : string - Used to do some additional mapping for IBM backend
+        graph : list - Contains information about graph size and edge
+        params : list - Parameters beta and gamma used by optimizer
+
+    Returns:
+        mapped_program : XACC Composite Intstruction
+    """   
     
     p = len(params)//2
     beta = params[:p]
@@ -168,6 +204,14 @@ def genDSPCircuit(qpu, qpu_id, graph, params):
     return mapped_program
 
 def getDSPExpectation(counts, graph):
+    """
+    Parameters:
+        counts : dict - Number of measurements per qubit bitstring
+        graph : list - Contains information about graph size and edge
+
+    Returns:
+        total_cost : float - Cost result for certain counts and graph
+    """
     
     v, edge_list = graph   
     vertice_list = list(range(0, v, 1))
@@ -204,6 +248,16 @@ def getDSPExpectation(counts, graph):
     return total_cost
 
 def genMaxcutCircuit(qpu, qpu_id, graph, params):
+    """
+    Parameters:
+        qpu : XACC Accelerator Object - Used for circuit compiler
+        qpu_id : string - Used to do some additional mapping for IBM backend
+        graph : list - Contains information about graph size and edge
+        params : list - Parameters beta and gamma used by optimizer
+
+    Returns:
+        mapped_program : XACC Composite Intstruction
+    """
     
     compiler = xacc.getCompiler('xasm')
     circuit = '__qpu__ void qaoa_maxcut(qbit q){  \n'
@@ -248,6 +302,14 @@ def genMaxcutCircuit(qpu, qpu_id, graph, params):
 
 
 def getMaxcutExpectation(counts, graph):
+    """
+    Parameters:
+        counts : dict - Number of measurements per qubit bitstring
+        graph : list - Contains information about graph size and edge
+
+    Returns:
+        total_cost : float - Cost result for certain counts and graph
+    """
     
     def maxcut_obj(x, graph):
         
@@ -270,6 +332,19 @@ def getMaxcutExpectation(counts, graph):
     return avg/sum_count
 
 def getOptFunction(qpu, graph, buffer, qpu_id, circuitFunc, expFunc, job_runtimes):
+    """
+    Parameters:
+        qpu : XACC Accelerator Object - Used for circuitFunc       
+        graph : list - Contains information about graph size and edge
+        buffer : XACC AcceletorBuffer Object - Used to store QPU results
+        qpu_id : string - Used for circuitFunc
+        circuitFunc : function - Circuit funtion to generate problem circuit
+        expFunc : function - Expectation function to compute cost
+        job_runtimes : list - List to store job runtimes
+
+    Returns:
+        execute_circuit: function - Used by optimizer to execute QPU
+    """
         
     def execute_circ(params):
         
@@ -287,10 +362,15 @@ def getOptFunction(qpu, graph, buffer, qpu_id, circuitFunc, expFunc, job_runtime
     return execute_circ
 
 def getRuntime(qpu_id, buffer, start):
-    
-    '''
-    Returns runtime of a backend in ms
-    '''
+    """
+    Parameters:
+        qpu_id : string - Used to determine where to get runtime information
+        buffer : XACC AcceletorBuffer Object - Used to read QPU information
+        start: float - Start time of QAOA job
+        
+    Returns:
+        runtime : float - Runtime of a backend in ms
+    """
     
     runtime = 0
     end = time.time()
@@ -302,11 +382,19 @@ def getRuntime(qpu_id, buffer, start):
         ibm_backend = qpu_id[4:]
         backend = provider.get_backend(ibm_backend)
         ID = buffer.getInformation().get('ibm-job-id')
-        job = backend.retrieve_job(ID)
+        
+        #Retreive job information
+        while(1):
+            job = backend.retrieve_job(ID)
+            times = job.time_per_step()
+            t_complete = times.get('COMPLETED')
+            t_run = times.get('RUNNING')
+            if(type(t_complete) ==  type(t_run)): #Sometimes, complete time is not retreived properly
+                break
+            print('Refetch ibm job information...')
         
         #Compute runtime
-        times = job.time_per_step()
-        timeDelta = times.get('COMPLETED') - times.get('RUNNING')
+        timeDelta = t_complete - t_run
         runtime = timeDelta.total_seconds()*1000 #s to ms
     
     elif(qpu_id == 'ionq'):
@@ -326,8 +414,21 @@ def getRuntime(qpu_id, buffer, start):
     return runtime
 
 def runQAOA(qpu, qpu_id, graph, problem, p, verbose = True):
+    """
+    Parameters:
+        qpu : XACC Accelerator Object - Used to generate optimizer function  
+        qpu_id : string - Used to generate optimizer function
+        graph : list - Contains information about graph size and edge
+        problem : string - Sets problem to be used (maxcut, TSP, DSP)
+        p : int - Iterations used in QAOA circuit generation
+        verbose : bool - If true, print optimizer results and draw QAOA counts
     
-    #Setup QAOA objects and functions
+    Returns:
+        result_list : list - Returns 8 best bitstring QAOA results
+        job_runtimes : list - Returns all job runtimes for QAOA optimization        
+    """
+    
+    #Setup QAOA objects and required problem functions
     nodes = graph[0]
     
     if(problem == 'maxcut'):

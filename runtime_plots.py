@@ -1,28 +1,43 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Tue Aug 31 20:29:26 2021
 
-@author: huub
+Auhtor: huub-d96
+Project: QAOA Benchmarks XACC platform
+Description: Functions to visualize benchmark resuts using matplotlib and 
+             draw graphs using networkx
 """
 
 import matplotlib.pyplot as plt
 import networkx as nx
 from matplotlib.ticker import FixedLocator
 
-def plot_iterations(backend_runtimes):
-    return
 
 def draw_graph(g):
+    """
+    Parameters:
+    g : list - input graph containing graph size and edge information
+
+    Returns: 
+        none
+    """
     
     graph = nx.Graph()
     graph.add_nodes_from(range(g[0]))
     graph.add_edges_from(g[1])
     nx.draw_circular(graph, with_labels=True, alpha=0.8, node_size=500)
     
-    return
 
 def lineplot_results(backend_runtimes, graph_sizes, title, legend = []):
+    """
+    Parameters:
+        backend_runtimes : nested list - Runtime resuls of multiple backends
+        graph_sizes : list - sizes of graph used in benchmark
+        title : string - Main plot title, based on problem and p
+        legend : list - qpu_ids used in benchmark
+
+    Returns: 
+        none
+    """
         
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
     fig.set_size_inches(8,4)
@@ -64,6 +79,7 @@ def lineplot_results(backend_runtimes, graph_sizes, title, legend = []):
     ax3.set_ylabel("Runtime [s]")
     
     #Add legend
+    #TODO: Currently does nothing
     for qpu in legend:
         if qpu in ['aer', 'qsim']:
             qpu = qpu+' (local)'
@@ -75,12 +91,19 @@ def lineplot_results(backend_runtimes, graph_sizes, title, legend = []):
     ax1.get_xaxis().tick_bottom()
     ax1.get_yaxis().tick_left()
     
-    fig.tight_layout()
+    fig.tight_layout()   
 
-    
-
-
+#TODO: Update boxplots for multiple backends
 def boxplot_results(runtimes_list, graph_sizes, title):
+    """
+    Parameters:
+        runtimes_list : list - Runtime resuls of single backend
+        graph_sizes : list - sizes of graph used in benchmark
+        title : string - Main plot title, based on problem and p
+
+    Returns: 
+        none
+    """
     fig = plt.figure(figsize =(10, 7))
     ax = fig.add_subplot(111)
      
@@ -136,5 +159,3 @@ def boxplot_results(runtimes_list, graph_sizes, title):
          
     # show plot
     plt.show(bp)
-    
-    return 

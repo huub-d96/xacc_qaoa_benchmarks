@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Sun Aug 22 21:22:07 2021
+Extra gate set to expand the basic XACC compiler set with higher level gates.
+All extra gates return a circuit as a string for the required qubits. This 
+string can be compiled using the XACC XASM compiler.
 
-@author: huub
 """
 from math import pi, acos, sqrt
 
@@ -104,7 +103,7 @@ def scs(n, k, qbits):
     circuit += ('CX(q[%i], q[%i]); \n' % (qbits[n-2], qbits[n-1]))
     
     for m in range(k-1):
-        l = 2+m
+        
         control = n-2-m
         circuit += ('CX(q[%i], q[%i]); \n' % (qbits[control-1], qbits[n-1]))
         theta = 2 * (acos(sqrt((n-control) / n)))

@@ -1,3 +1,9 @@
+'''
+Exact solvers for maxcut, traveling salesman and dominating set problem.
+Original code: https://github.com/koenmesman/benchmark_qaoa_IBM
+Edited by: huub-d96
+'''
+
 import generate_graph as gg
 from itertools import permutations, combinations_with_replacement
 
