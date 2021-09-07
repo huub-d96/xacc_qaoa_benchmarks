@@ -6,6 +6,18 @@ string can be compiled using the XACC XASM compiler.
 """
 from math import pi, acos, sqrt
 
+def crz(theta, q0, q1):
+    
+    circuit = "//CRZ: \n"
+    
+    circuit += ('Rz(q[%i], %f); \n' % (q1, theta/2))
+    circuit += ('CX(q[%i], q[%i]); \n' % (q0, q1))
+    circuit += ('Rz(q[%i], %f); \n' % (q1, -theta/2))
+    circuit += ('CX(q[%i], q[%i]); \n' % (q0, q1))   
+    
+    return circuit
+    
+
 def rxx(theta, q0, q1):
     
     circuit = "//RXX: \n"
@@ -54,18 +66,18 @@ def toffoli(q0, q1, q2):
     
     circuit += ('H(q[%i]); \n' % q2)
     circuit += ('CX(q[%i], q[%i]); \n' % (q1, q2))
-    circuit += ('Tdg(q[%i]); \n' % q2)
+    circuit += ('Rz(q[%i], %f);' % (q2, -pi/4)) #Tdg
     circuit += ('CX(q[%i], q[%i]); \n' % (q0, q2))
-    circuit += ('T(q[%i]); \n' % q2)
+    circuit += ('Rz(q[%i], %f);' % (q2, pi/4)) #T
     circuit += ('CX(q[%i], q[%i]); \n' % (q1, q2))
-    circuit += ('Tdg(q[%i]); \n' % q2)
+    circuit += ('Rz(q[%i], %f);' % (q2, -pi/4)) #Tdg
     circuit += ('CX(q[%i], q[%i]); \n' % (q0, q2))
-    circuit += ('T(q[%i]); \n' % q1)
-    circuit += ('T(q[%i]); \n' % q2)
+    circuit += ('Rz(q[%i], %f);' % (q1, pi/4)) #T
+    circuit += ('Rz(q[%i], %f);' % (q2, pi/4)) #T
     circuit += ('CX(q[%i], q[%i]); \n' % (q0, q1))
     circuit += ('H(q[%i]); \n' % q2)
-    circuit += ('T(q[%i]); \n' % q0)
-    circuit += ('Tdg(q[%i]); \n' % q1)
+    circuit += ('Rz(q[%i], %f);' % (q0, pi/4)) #T
+    circuit += ('Rz(q[%i], %f);' % (q1, -pi/4))#Tdg
     circuit += ('CX(q[%i], q[%i]); \n' % (q0, q1))
     
     return circuit
@@ -150,7 +162,7 @@ def OR_nrz(n, gamma, qbits):
     for i in range(2, n):
         circuit += OR_2q(qbits[i], qbits[n+i-2], qbits[n+i-1])
     
-    circuit += ('CRZ(q[%i], q[%i], %f); \n' % (2*n-2, 2*n-1, gamma))
+    circuit += crz(gamma, 2*n-2, 2*n-1)
     
     for i in range(n, 2, -1):
         circuit += OR_2q(qbits[n-i-1], qbits[2*n-2-i], qbits[2*n-1-i])

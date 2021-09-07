@@ -79,10 +79,11 @@ def lineplot_results(backend_runtimes, graph_sizes, title, legend = []):
     ax3.set_ylabel("Runtime [s]")
     
     #Add legend
-    for i, qpu in enumerate(legend):
+    legend_copy = legend.copy()
+    for i, qpu in enumerate(legend_copy):
         if qpu in ['aer', 'qsim', 'qpp']:
-            legend[i]= qpu +' (local)'
-    fig.legend(legend, loc='upper center', bbox_to_anchor=(0.5, 0.05),
+            legend_copy[i]= qpu +' (local)'
+    fig.legend(legend_copy, loc='upper center', bbox_to_anchor=(0.5, 0.05),
           fancybox=True, shadow=True, ncol=5)
      
     # Removing top axes and right axes

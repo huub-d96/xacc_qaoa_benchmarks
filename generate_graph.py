@@ -65,6 +65,10 @@ def set_probability(n, p):
 
 # return a regular graph
 def regular_graph(n):
+    if n == 3:
+        return [n, [[0,1], [1,2],[2,0]]] #Triangle
+    elif n == 4:
+        return [n, [[0,1], [1,2],[2,3], [3,0]]] #Square
     edges = []
     for i in range(n-1):
         edges.append([i, i+1])

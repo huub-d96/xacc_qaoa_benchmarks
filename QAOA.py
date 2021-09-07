@@ -170,7 +170,7 @@ def genDSPCircuit(qpu, qpu_id, graph, params):
         
         #inverted crz gate
         circuit +=  ('X(q[%i]); \n' % qubit)
-        circuit += ('CRZ(q[%i], q[%i], %f); \n' % (qubit, n-1, -gamma[0]))
+        circuit +=  gates.crz(-gamma[0], qubit, n-1)
         circuit +=  ('X(q[%i]); \n' % qubit)
         
     for iteration in range(p):
@@ -194,13 +194,13 @@ def genDSPCircuit(qpu, qpu_id, graph, params):
         circuit += ('Measure(q[%i]); \n' % N)
         
     circuit += ('}')  
-    
+        
     program = compiler.compile(circuit, qpu)
     
     mapped_program = program.getComposite('qaoa_dsp')
     if(qpu_id[0:3] == 'ibm'):
         mapped_program.defaultPlacement(qpu)
-        
+       
     return mapped_program
 
 def getDSPExpectation(counts, graph):
@@ -384,18 +384,19 @@ def getRuntime(qpu_id, buffer, start):
         ID = buffer.getInformation().get('ibm-job-id')
         
         #Retreive job information
-        while(1):
-            job = backend.retrieve_job(ID)
-            times = job.time_per_step()
-            t_complete = times.get('COMPLETED')
-            t_run = times.get('RUNNING')
-            if(type(t_complete) ==  type(t_run)): #Sometimes, complete time is not retreived properly
-                break
-            print('Refetch ibm job information...')
+        job = backend.retrieve_job(ID)
+        times = job.time_per_step()
+        t_complete = times.get('COMPLETED')
+        t_run = times.get('RUNNING')
+        if(type(t_complete) !=  type(t_run)): #Sometimes, complete time is not retreived properly
+            print("IBM data error, inserting 0")
+            runtime = 0
+        else:
+            #Compute runtime
+            timeDelta = t_complete - t_run
+            runtime = timeDelta.total_seconds()*1000 #s to ms    
         
-        #Compute runtime
-        timeDelta = t_complete - t_run
-        runtime = timeDelta.total_seconds()*1000 #s to ms
+        
     
     elif(qpu_id == 'ionq'):
         import requests
