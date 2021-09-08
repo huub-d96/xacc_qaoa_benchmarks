@@ -453,7 +453,7 @@ def runQAOA(qpu, qpu_id, graph, problem, p, verbose = True):
     job_runtimes = []
     optFunc = getOptFunction(qpu, graph, buffer, qpu_id, circuitFunc, expFunc, job_runtimes)
     initParams = [1.0]*2*p
-    optResult = minimize(optFunc, initParams, method='COBYLA')
+    optResult = minimize(optFunc, initParams, method='COBYLA', options={'maxiter': 250})
     if verbose : print(optResult) 
     optParams = optResult.x
     

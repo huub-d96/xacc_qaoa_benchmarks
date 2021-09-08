@@ -23,13 +23,13 @@ from os.path import isfile, join
 """"BENCHMARK PARAMETERS TO EDIT """
 # Get access to the desired QPU and
 # allocate some qubits to run on
-qpu_ids = ['ibm:ibmq_qasm_simulator', 'aer'] #, 'qpp', 'qsim', 
+qpu_ids = ['ibm:ibmq_qasm_simulator', 'aer', 'qsim', 'ionq'] #, 'qpp', 'qsim', 
 
 #Setup QAOA circuit parameters
 #Set of graph sizes for problems (>15 qbits takes long time for local simulators)
 problem_set = [
                #['DSP', [5, 7, 9, 11, 13, 15, 17, 19]],
-               ['TSP', [3, 4, 5]],
+               ['TSP', [3, 4]], #, 5]],
                ['maxcut', [5 ,7, 9, 11, 13, 15, 17, 19, 21, 23, 25]]
                ] #maxcut, TSP, DSP  
 
@@ -54,7 +54,7 @@ for problem, graph_sizes  in problem_set:
             
             #Run ID
             num_str = '0'+str(size) if size < 10 else str(size)
-            run_id = str(problem)+'_'+str(qpu_id)+'_size_'+num_str+'_p'+str(p)
+            run_id = str(problem)+'-'+str(qpu_id)+'-size-'+num_str+'-p'+str(p)
             
             #Check if data is allready available
             
@@ -95,8 +95,8 @@ for problem, graph_sizes  in problem_set:
     for qpu_id in qpu_ids:        
         runtimes_list = []
         for filename in data_list:
-            index = filename.split('_')
-            if (index[0] == problem and index[1] == qpu_id):                
+            index = filename.split('-')
+            if (index[0] == problem and index[1] == qpu_id and int(index[3]) in graph_sizes):                
                 runtimes_list.append(pickle.load(open('./data/'+filename, "rb")))
         backend_runtimes.append(runtimes_list)
     
