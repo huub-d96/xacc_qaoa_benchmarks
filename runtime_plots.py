@@ -61,7 +61,8 @@ def lineplot_results(backend_runtimes, graph_sizes, title, legend = []):
     ax3.xaxis.set_major_locator(FixedLocator(graph_sizes))
     
     #y-axis scale
-    #plt.yscale("log")
+    ax1.set_yscale("log")
+    ax3.set_yscale("log")
     #ax.set_ylim([10**(-1), 10**6])
      
     # Adding title
@@ -72,7 +73,7 @@ def lineplot_results(backend_runtimes, graph_sizes, title, legend = []):
     
     ax2.set_title('Optimizer iterations')
     ax2.set_xlabel("Nodes")
-    ax2.set_ylabel("Iterations []")
+    ax2.set_ylabel("Iterations")
     
     ax3.set_title('Total QAOA runtime')
     ax3.set_xlabel("Nodes")
@@ -91,7 +92,9 @@ def lineplot_results(backend_runtimes, graph_sizes, title, legend = []):
     ax1.get_xaxis().tick_bottom()
     ax1.get_yaxis().tick_left()
     
-    fig.tight_layout()   
+    fig.tight_layout()
+    
+    plt.savefig("plots/"+"".join(title.split(" "))+".pdf", bbox_inches='tight')
 
 #TODO: Update boxplots for multiple backends
 def boxplot_results(runtimes_list, graph_sizes, title):

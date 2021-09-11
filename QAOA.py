@@ -439,7 +439,10 @@ def runQAOA(qpu, qpu_id, graph, problem, p, verbose = True):
     elif(problem == 'TSP'):
         circuitFunc = genTSPCircuit
         expFunc = getTSPExpectation
-        n_qbits = nodes**2
+        if nodes == 2:
+            n_qbits = nodes**2 + 1
+        else:
+            n_qbits = nodes**2
     elif(problem == 'DSP'):
         circuitFunc = genDSPCircuit
         expFunc = getDSPExpectation

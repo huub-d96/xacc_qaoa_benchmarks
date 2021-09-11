@@ -23,14 +23,19 @@ from os.path import isfile, join
 """"BENCHMARK PARAMETERS TO EDIT """
 # Get access to the desired QPU and
 # allocate some qubits to run on
-qpu_ids = ['ibm:ibmq_qasm_simulator', 'aer', 'qsim', 'ionq'] #, 'qpp', 'qsim', 
+qpu_ids = ['ibm:ibmq_qasm_simulator', 
+           #'ionq', 
+           'aer', 
+           'qsim', 
+           #'qpp'
+           ]
 
 #Setup QAOA circuit parameters
-#Set of graph sizes for problems (>15 qbits takes long time for local simulators)
+#Set of graph sizes for problems (>15 qbits takes long time for local simulators, 2n for DSP and n^2 for TSP)
 problem_set = [
-               #['DSP', [5, 7, 9, 11, 13, 15, 17, 19]],
-               ['TSP', [3, 4]], #, 5]],
-               ['maxcut', [5 ,7, 9, 11, 13, 15, 17, 19, 21, 23, 25]]
+               ['DSP', [3, 5, 7, 9, 11, 13]], #IonQ crash at 11
+               ['TSP', [2, 3, 4, 5]], #IonQ crash at 5
+               ['maxcut', [5 ,7, 9, 11, 13, 15, 17, 19, 21, 23, 25]] #ionq crash at 21
                ] #maxcut, TSP, DSP  
 
 p = 1  #Increasing p usually improves QAOA score, but also drastically incraeses simulation time

@@ -65,7 +65,9 @@ def set_probability(n, p):
 
 # return a regular graph
 def regular_graph(n):
-    if n == 3:
+    if n == 2:
+        return [n, [[0,1]]] #line
+    elif n == 3:
         return [n, [[0,1], [1,2],[2,0]]] #Triangle
     elif n == 4:
         return [n, [[0,1], [1,2],[2,3], [3,0]]] #Square
