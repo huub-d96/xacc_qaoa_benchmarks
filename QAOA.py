@@ -446,7 +446,7 @@ def runQAOA(qpu, qpu_id, graph, problem, p, verbose = True):
     elif(problem == 'DSP'):
         circuitFunc = genDSPCircuit
         expFunc = getDSPExpectation
-        n_qbits = 2*nodes
+        n_qbits = nodes + 5 #For regular graphs
     else:
         sys.exit('Unknown problem set: Exit...')
         
