@@ -277,7 +277,7 @@ def genMaxcutCircuit(qpu, qpu_id, graph, params):
         #For all edges, set cost Hamiltonian
         for E in edge_list:            
             circuit += ('CX(q[%i], q[%i]); \n' % (E[0], E[1]))
-            circuit += ('Ry(q[%i], %f); \n' % (E[1], gamma[P]))
+            circuit += ('Rz(q[%i], %f); \n' % (E[1], gamma[P]))
             circuit += ('CX(q[%i], q[%i]); \n' % (E[0], E[1]))
         
         #Apply mixer hamilonian to all qubits    

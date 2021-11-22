@@ -10,7 +10,7 @@ Description: Functions to visualize benchmark resuts using matplotlib and
 import matplotlib.pyplot as plt
 import networkx as nx
 from matplotlib.ticker import FixedLocator
-
+import numpy as np
 
 def draw_graph(g):
     """
@@ -42,7 +42,7 @@ def lineplot_results(backend_runtimes, graph_sizes, title, legend = []):
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
     fig.set_size_inches(8,4)
     
-    for runtimes_list in backend_runtimes:
+    for it, runtimes_list in enumerate(backend_runtimes):
         means = []
         iters = []
         totals = []
@@ -53,6 +53,18 @@ def lineplot_results(backend_runtimes, graph_sizes, title, legend = []):
         ax1.plot(graph_sizes, means, marker = 'o') 
         ax2.plot(graph_sizes, iters, marker = 'o') 
         ax3.plot(graph_sizes, totals, marker = 'o')
+            
+        #Debugging 
+        if(False):
+            fit = np.polyfit(graph_sizes, np.log(iters), 2)
+            fit_line = np.exp(fit[2] + fit[1]*np.asarray(graph_sizes) + fit[0]*np.asarray(graph_sizes)**2)
+            ax2.plot(graph_sizes, fit_line, marker = 'x') 
+            if('maxcut' in title):
+                print(f'MCP - {legend[it]}: exp({fit[2]:.2f} + {fit[1]:.2f}n + {fit[0]:.2f}n^2)')
+            elif('DSP' in title):
+                print(f'DSP - {legend[it]}: exp({fit[2]:.2f} + {fit[1]:.2f}n + {fit[0]:.2f}n^2)')
+            elif('TSP' in title):
+                print(f'TSP - {legend[it]}: exp({fit[2]:.2f} + {fit[1]:.2f}n + {fit[0]:.2f}n^2)')
       
     
     # Force x-axis integers

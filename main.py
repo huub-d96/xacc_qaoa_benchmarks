@@ -24,18 +24,18 @@ from os.path import isfile, join
 # Get access to the desired QPU and
 # allocate some qubits to run on
 qpu_ids = ['ibm:ibmq_qasm_simulator', 
-           #'ionq', 
+           'ionq', 
            'aer', 
            'qsim', 
-           #'qpp'
+           'qpp'
            ]
 
 #Setup QAOA circuit parameters
 #Set of graph sizes for problems (>15 qbits takes long time for local simulators, 2n for DSP and n^2 for TSP)
 problem_set = [
-               ['DSP', [3, 5, 7, 9, 11, 13]], #IonQ crash at 11
-               ['TSP', [2, 3, 4, 5]], #IonQ crash at 5
-               ['maxcut', [5 ,7, 9, 11, 13, 15, 17, 19, 21, 23, 25]] #ionq crash at 21
+               ['maxcut', [5 ,7, 9, 11, 13, 15, 17, 19]], #, 21, 23, 25]], #ionq crash at 21
+               ['DSP', [3, 5, 7, 9, 11, 13]], #, 15, 17, 19]], #QPP 11 takes long time at 11, IonQ crash at 17
+               ['TSP', [2, 3, 4]]# , 5]] #IonQ crash at 5
                ] #maxcut, TSP, DSP  
 
 p = 1  #Increasing p usually improves QAOA score, but also drastically incraeses simulation time
@@ -47,10 +47,7 @@ data_list = [f for f in listdir("./data") if isfile(join("./data", f))]
 
 for problem, graph_sizes  in problem_set:
     
-    for qpu_id in qpu_ids:
-        
-        #Configure accelerator
-        qpu = xacc.getAccelerator(qpu_id, {'shots' : 2048})        
+    for qpu_id in qpu_ids:             
         
         #Declare empty runtime list and start simulations
         runtimes_list = []    
@@ -64,6 +61,9 @@ for problem, graph_sizes  in problem_set:
             #Check if data is allready available
             
             if run_id not in data_list:  
+                
+                #Configure accelerator
+                qpu = xacc.getAccelerator(qpu_id, {'shots' : 2048})  
             
                 #Genererate appropriate graph for problem set
                 if(problem !='TSP'):
